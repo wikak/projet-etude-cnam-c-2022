@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <sys/types.h>
 
+
 #define FICHIER = 2
 #define TAILLE_MAX 1000
 
@@ -176,11 +177,16 @@ char *itoa(int value, char *result, int base)
       return result;
 }
 
+void gestionnaire_alarme(int signum)
+{
+      printf("L'alarme a été déclenchée\n");
+}
+
 int main(int argc, char *argv[])
 {
-      signal(SIGTERM, handle_sigterm);
-      // Définissez un temporisateur pour 20 secondes
-      // alarm(20);
+      // signal(SIGTERM, handle_sigterm);
+     // signal(SIGALRM, gestionnaire_alarme);
+      // alarm(10);
       // pause();
 
       // On initilise les informations du pipe
@@ -212,10 +218,12 @@ int main(int argc, char *argv[])
       // TODO : Les variables des équipes doivent être écrite en binaire
 
       char NumEquipA[33];
-      itoa(1, NumEquipA, 2);
+      itoa(20, NumEquipA, 2);
 
       char NumEquipB[33];
-      itoa(1, NumEquipB, 2);
+      itoa(21, NumEquipB, 2);
+
+      char resultat[500];
 
       //   printf("Le numéro de l'équipe A est %d\n", NumEquipA);
 
@@ -225,7 +233,7 @@ int main(int argc, char *argv[])
 
       int ret = pipe(pipefd);
 
-      char message_to_send[] = "f0000,f0001";
+      char message_to_send[] = "";
       const char delimiter[] = ",";
 
       FILE *fichier = NULL;
@@ -274,17 +282,24 @@ int main(int argc, char *argv[])
                         if (size == 0)
                         {
                               printf("Le fichier est vide A est prêt!\n");
-                              fprintf(fichier, "Team A- ProcessusAttaquant A1\n");
+                              // Num Équipe et PID de l'attaquant 
+                              strcpy(resultat, "Num Equipe A : ");
+                              strcat(resultat, NumEquipA);
+                              strcat(resultat, " - PID attaquant : ");
+                              strcat(resultat, QGA1);
+                              strcat(resultat, "\n");
+                             //  printf("Résultat : %s\n", resultat);
+                              fprintf(fichier, "%s", resultat);
                               scoring("teamA");
-                            //  handle_mysigterm();
+                              //  handle_mysigterm();
                         }
                         else
                         {
                               // read_info_in_file(fichier);
                               printf("File is not empty Team B already write!\n");
                               printf("PidProcessusAttaquantB1 dans Processus A : %d\n", PidProcessusAttaquantB1);
-                              fprintf(fichier, "Mort du ProcessusAttaquant B1\nTeam A- ProcessusAttaquant A1\n");   
-                             // handle_mysigterm(PidProcessusAttaquantB1);
+                              fprintf(fichier, "Mort du ProcessusAttaquant B1\nTeam A- ProcessusAttaquant A1\n");
+                              // handle_mysigterm(PidProcessusAttaquantB1);
                               // kill(PidProcessusAttaquantB1, SIGTERM);
 
                               /**int result = kill(PidProcessusAttaquantB1, SIGKILL);
@@ -305,7 +320,7 @@ int main(int argc, char *argv[])
                   }
 
                   // Si le fichier est vide j'écris le message suivant : Team A1 - Attaquant  QGA1
-    
+
                   close(pipefd[0]);
                   // return 0;
             }
@@ -358,23 +373,27 @@ int main(int argc, char *argv[])
                         size = ftell(fichier);
 
                         printf("La taille du fichier est de %d avant que B écrive \n", size);
-                       //  handle_mysigterm(PidProcessusAttaquantA1);
+                        //  handle_mysigterm(PidProcessusAttaquantA1);
                         if (size == 0)
                         {
+                                strcpy(resultat, "Num Equipe B : ");
+                              strcat(resultat, NumEquipB);
+                              strcat(resultat, " - PID attaquant : ");
+                              strcat(resultat, QGB1);
+                              strcat(resultat, "\n");
                               printf("Le fichier est vide B est prêt!\n");
-                              fprintf(fichier, "Team B- ProcessusAttaquant B1\n");
+                              fprintf(fichier, "%s", resultat);
                               scoring("teamB");
-                            //  handle_mysigterm();
+                              //  handle_mysigterm();
                         }
                         else
                         {
                               printf("File is not empty Team A already write!\n");
                               printf("PidProcessusAttaquanA1 dans Processus B : %d\n", PidProcessusAttaquantA1);
-                              fprintf(fichier, "Mort du ProcessusAttaquant A1\nTeam B- ProcessusAttaquant B1\n");  
-                               scoring("teamB");
+                              fprintf(fichier, "Mort du ProcessusAttaquant A1\nTeam B- ProcessusAttaquant B1\n");
+                              scoring("teamB");
                               // printf("PidProcessusAttaquantA1 : %d!\n", PidProcessusAttaquantA1);
 
-                             
                               /**   int result = kill(PidProcessusAttaquantA1, SIGKILL);
                                  if (result == -1)
                                  {
@@ -392,7 +411,7 @@ int main(int argc, char *argv[])
 
                         //
                   }
-               
+
                   close(pipefd[0]);
                   // return 0;
             }
@@ -413,7 +432,6 @@ int main(int argc, char *argv[])
                strcpy(buffer, "Bonjour, je suis le processus père !\n");
                write(pipefd[1], buffer, strlen(buffer) + 1);*/
       }
-        
       return 0;
       // Ici c'est le processus du père
 }
