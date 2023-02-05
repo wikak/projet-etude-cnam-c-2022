@@ -298,7 +298,14 @@ int main(int argc, char *argv[])
                               // read_info_in_file(fichier);
                               printf("File is not empty Team B already write!\n");
                               printf("PidProcessusAttaquantB1 dans Processus A : %d\n", PidProcessusAttaquantB1);
-                              fprintf(fichier, "Mort du ProcessusAttaquant B1\nTeam A- ProcessusAttaquant A1\n");
+                              strcpy(resultat, "Mort du ProcessusAttaquant B1. Num Equipe A ");
+                              strcat(resultat, NumEquipA);
+                              strcat(resultat, " - PID attaquant : ");
+                              strcat(resultat, QGA1);
+                              strcat(resultat, "\n");
+                              fprintf(fichier, "%s", resultat);
+                               scoring("teamA");
+                              ///fprintf(fichier, "Mort du ProcessusAttaquant B1\nTeam A- ProcessusAttaquant A1\n");
                               // handle_mysigterm(PidProcessusAttaquantB1);
                               // kill(PidProcessusAttaquantB1, SIGTERM);
 
@@ -390,7 +397,13 @@ int main(int argc, char *argv[])
                         {
                               printf("File is not empty Team A already write!\n");
                               printf("PidProcessusAttaquanA1 dans Processus B : %d\n", PidProcessusAttaquantA1);
-                              fprintf(fichier, "Mort du ProcessusAttaquant A1\nTeam B- ProcessusAttaquant B1\n");
+                              strcpy(resultat, "Mort du ProcessusAttaquant A1. Num Equipe B ");
+                              strcat(resultat, NumEquipB);
+                              strcat(resultat, " - PID attaquant : ");
+                              strcat(resultat, QGB1);
+                              strcat(resultat, "\n");
+                              fprintf(fichier, "%s", resultat);
+                            //  fprintf(fichier, "Mort du ProcessusAttaquant A1\nTeam B- ProcessusAttaquant B1\n");
                               scoring("teamB");
                               // printf("PidProcessusAttaquantA1 : %d!\n", PidProcessusAttaquantA1);
 
