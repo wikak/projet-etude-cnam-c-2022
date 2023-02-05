@@ -3,6 +3,7 @@
         ".env": "dotenv",
         "__config": "c",
         "*.inc": "c",
-        "ratio": "c"
+        "ratio": "c",
+        "scoring.h": "c"
     }
 }

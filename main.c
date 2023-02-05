@@ -10,126 +10,12 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/types.h>
-
+#include "helpers/scoring.c"
+#include "helpers/itoa.c"
+// #include "headers/variables.h"
 
 #define FICHIER = 2
 #define TAILLE_MAX 1000
-
-// Script de générations de fichiers
-
-// TODO : Il faudra arriver à générer 10.000
-
-/**int write_in_file_when_is_empty(team, ProcessusAttaquant, fichier)
-{
-      char str[80];
-      strcpy(str, "team ");
-      strcat(str, team);
-      strcat(str, "ProcessusAttaquant ");
-      strcat(str, ProcessusAttaquant);
-      strcat(str, "\n");
-      puts(str);
-      fputs(str, fichier);
-      fclose(fichier);
-}*/
-
-/**int convertir_en_binaire_pid(pid)
-{
-      int tab[10], i;
-       printf("Le pid de l'attaquant: %d\n", pid);
-
-      for (i = 0; pid > 0; i++)
-      {
-            tab[i] = pid % 2;
-            pid = pid / 2;
-      }
-       for(i=i-1; i >= 0; i--) {
-            printf("\nLe nombre binaire est = %d", tab[i]);
-       }
-      return 0;
-
-}*/
-int score_team_A = 0;
-int score_team_B = 0;
-void write_info_in_file(char *message, FILE *fichier)
-{
-      // fputs(message, fichier);
-      // fclose(fichier);
-      char chaine[TAILLE_MAX] = "";
-
-      //  char *team = "Team A";
-      // char *ProcessusAttaquant = "ProcessusAttaquant A1";
-
-      fprintf(fichier, "%s", message);
-
-      // Si le fichier est vide
-
-      // Si le fichier n’est pas vide
-      // Sinon si l’attaquant n’est pas de la même équipe que celui qui vient de précédemment écrire
-}
-
-void read_file(char *message, FILE *fichier, char *searchTerm)
-{
-
-      char chaine[TAILLE_MAX] = "";
-      char line[TAILLE_MAX];
-      fseek(fichier, -TAILLE_MAX, SEEK_END);
-      printf("read_info_in_file\n");
-
-      while (fgets(chaine, TAILLE_MAX, fichier) != NULL)
-      {
-            printf("Search term found: %s", line);
-            if (strstr(line, searchTerm))
-            {
-                  printf("Search term found: %s", line);
-                  break;
-            }
-            else
-            {
-                  printf("Le term n'ont trouvé");
-                  write_info_in_file(message, fichier);
-            }
-      }
-}
-
-void scoring(char *team)
-{
-      if (strcmp(team, "teamA") == 0)
-      {
-            score_team_A += 1;
-      }
-      else if (strcmp(team, "teamB") == 0)
-      {
-            score_team_B += 1;
-      }
-
-      printf("score de la team A : %d\n", score_team_A);
-      printf("score de la team B : %d\n", score_team_B);
-}
-
-// Script de génération des fichiers
-void script_de_generation_des_fichiers()
-{
-      // printf("script_de_generation_des_fichiers\n");
-
-      // FILE *fichier = NULL;
-      int i = 0;
-
-      while (i < 1)
-      {
-            // fichier = fopen("dossiers/F0001.txt", "a");
-
-            // char buffer[32]; // The filename buffer.
-            // Put "file" then k then ".txt" in to filename. => f0010 | f00010
-            // snprintf(buffer, sizeof(char) * 32, "dossiers/f000%i.txt", i);
-
-            // fichier = fopen("dossiers/f000%i.txt", "rwb");
-            // fichier = fopen("dossiers/f0000.txt", "rwb");
-
-            i++;
-      }
-
-      //
-}
 
 void handle_sigterm(int signal)
 
@@ -145,52 +31,26 @@ void handle_mysigterm()
       _exit(0);
 }
 
-char *itoa(int value, char *result, int base)
-{
-      // check that the base if valid
-      if (base < 2 || base > 36)
-      {
-            *result = '\0';
-            return result;
-      }
-
-      char *ptr = result, *ptr1 = result, tmp_char;
-      int tmp_value;
-
-      do
-      {
-            tmp_value = value;
-            value /= base;
-            *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + (tmp_value - value * base)];
-      } while (value);
-
-      // Apply negative sign
-      if (tmp_value < 0)
-            *ptr++ = '-';
-      *ptr-- = '\0';
-      while (ptr1 < ptr)
-      {
-            tmp_char = *ptr;
-            *ptr-- = *ptr1;
-            *ptr1++ = tmp_char;
-      }
-      return result;
-}
-
 void gestionnaire_alarme(int signum)
 {
       printf("L'alarme a été déclenchée\n");
 }
 
+void gestionnaire_quitter(int signum)
+{
+      printf("Le processus va être terminé avec le signal SIGQUIT\n");
+      exit(0);
+}
+
 int main(int argc, char *argv[])
 {
       // signal(SIGTERM, handle_sigterm);
-     // signal(SIGALRM, gestionnaire_alarme);
-      // alarm(10);
-      // pause();
+      signal(SIGALRM, gestionnaire_alarme);
+      alarm(10);
+      pause();
 
       // On initilise les informations du pipe
-      int pipefd[2];
+      // int fd[2];
       char buffer[100];
 
       char binary_string[33];
@@ -200,11 +60,11 @@ int main(int argc, char *argv[])
 
       // Equipe A
       // Processus principal Equipe A
-      char QGA[33], QGA1[33], QGA2[33];
+      char QGA[33], QGA1[33];
 
       // Processus attaquant Equipe A
-      pid_t ProcessusA, ProcessusAttaquantA1, ProcessusAttaquantA2;
-      pid_t PidProcessusAttaquantA1 = 128;
+      pid_t ProcessusQGA, ProcessusA1;
+      pid_t PidProcessusA1 = 128;
 
       // Equipe B
       // Equipe A
@@ -212,8 +72,8 @@ int main(int argc, char *argv[])
       char QGB[33], QGB1[33], QGB2[33];
 
       // Processus attaquant Equipe B
-      pid_t ProcessusB, ProcessusAttaquantB1, ProcessusAttaquantB2;
-      pid_t PidProcessusAttaquantB1 = 170;
+      pid_t ProcessusQGB, ProcessusB1, ProcessusB2;
+      pid_t PidProcessusB1 = 170;
 
       // TODO : Les variables des équipes doivent être écrite en binaire
 
@@ -231,7 +91,7 @@ int main(int argc, char *argv[])
 
       int fd[2];
 
-      int ret = pipe(pipefd);
+      int ret = pipe(fd);
 
       char message_to_send[] = "";
       const char delimiter[] = ",";
@@ -252,23 +112,23 @@ int main(int argc, char *argv[])
 
       // ÉQUIPE A
       // Créer le processus parent A
-      ProcessusA = fork();
+      ProcessusQGA = fork();
 
       // On vérifie si le processus A a bien été crée
-      if (ProcessusA == 0)
+      if (ProcessusQGA == 0)
       {
             // Premier processus fils
-            ProcessusAttaquantA1 = fork();
+            ProcessusA1 = fork();
             // char received_message[100], send_message[100];
 
-            if (ProcessusAttaquantA1 == 0)
+            if (ProcessusA1 == 0)
             {
 
                   itoa(getpid(), QGA1, 2);
                   //  printf("Mon 1er fils pid du processus A %s .\n", QGA1);
                   char buf[sizeof(message_to_send)];
-                  close(pipefd[1]);                  // ferme la fin d'écriture du tube
-                  read(pipefd[0], buf, sizeof(buf)); // lit depuis la fin de lecture du tube
+                  close(fd[1]);                  // ferme la fin d'écriture du tube
+                  read(fd[0], buf, sizeof(buf)); // lit depuis la fin de lecture du tube
                                                      // printf("received message 1er fils du processus A: %s\n", buf);
                   fichier = fopen("dossiers/f0000.txt", "a+");
                   if (fichier != NULL)
@@ -282,34 +142,39 @@ int main(int argc, char *argv[])
                         if (size == 0)
                         {
                               printf("Le fichier est vide A est prêt!\n");
-                              // Num Équipe et PID de l'attaquant 
+                              // Num Équipe et PID de l'attaquant
                               strcpy(resultat, "Num Equipe A : ");
                               strcat(resultat, NumEquipA);
                               strcat(resultat, " - PID attaquant : ");
                               strcat(resultat, QGA1);
                               strcat(resultat, "\n");
-                             //  printf("Résultat : %s\n", resultat);
+                              //  printf("Résultat : %s\n", resultat);
                               fprintf(fichier, "%s", resultat);
                               scoring("teamA");
                               //  handle_mysigterm();
                         }
                         else
                         {
+
                               // read_info_in_file(fichier);
                               printf("File is not empty Team B already write!\n");
-                              printf("PidProcessusAttaquantB1 dans Processus A : %d\n", PidProcessusAttaquantB1);
-                              strcpy(resultat, "Mort du ProcessusAttaquant B1. Num Equipe A ");
+                              printf("PidProcessusB1 dans Processus A : %d\n", PidProcessusB1);
+                              strcpy(resultat, "Mort du Processus B1. Num Equipe A ");
                               strcat(resultat, NumEquipA);
                               strcat(resultat, " - PID attaquant : ");
                               strcat(resultat, QGA1);
                               strcat(resultat, "\n");
                               fprintf(fichier, "%s", resultat);
-                               scoring("teamA");
-                              ///fprintf(fichier, "Mort du ProcessusAttaquant B1\nTeam A- ProcessusAttaquant A1\n");
-                              // handle_mysigterm(PidProcessusAttaquantB1);
-                              // kill(PidProcessusAttaquantB1, SIGTERM);
+                              scoring("teamA");
 
-                              /**int result = kill(PidProcessusAttaquantB1, SIGKILL);
+                              signal(SIGQUIT, gestionnaire_quitter);
+                              printf("Envoi du signal SIGQUIT\n");
+                              raise(SIGQUIT);
+                              /// fprintf(fichier, "Mort du Processus B1\nTeam A- Processus A1\n");
+                              // handle_mysigterm(PidProcessusB1);
+                              // kill(PidProcessusB1, SIGTERM);
+
+                              /**int result = kill(PidProcessusB1, SIGKILL);
                               if (result == -1)
                               {
                                     perror("Error killing process");
@@ -317,7 +182,7 @@ int main(int argc, char *argv[])
                               else
                               {
                                     printf("File is not empty Team B already write!\n");
-                                    fprintf(fichier, "Team A- ProcessusAttaquant A1\n");
+                                    fprintf(fichier, "Team A- Processus A1\n");
                                     fclose(fichier);
                                     scoring("teamA");
                               }**/
@@ -328,7 +193,7 @@ int main(int argc, char *argv[])
 
                   // Si le fichier est vide j'écris le message suivant : Team A1 - Attaquant  QGA1
 
-                  close(pipefd[0]);
+                  close(fd[0]);
                   // return 0;
             }
             // return 0;
@@ -339,35 +204,35 @@ int main(int argc, char *argv[])
             itoa(getpid(), QGA, 2);
             // printf("Mon pid du processus principal A %s .\n", QGA);
 
-            close(pipefd[0]); // ferme la fin de lecture du tube
-            write(pipefd[1], message_to_send, strlen(message_to_send) + 1);
-            close(pipefd[1]); /** */
+            close(fd[0]); // ferme la fin de lecture du tube
+            write(fd[1], message_to_send, strlen(message_to_send) + 1);
+            close(fd[1]); /** */
 
             // Processus père
-            /**  close(pipefd[0]);
+            /**  close(fd[0]);
                strcpy(buffer, "Bonjour, je suis le processus père !\n");
-               write(pipefd[1], buffer, strlen(buffer) + 1);*/
+               write(fd[1], buffer, strlen(buffer) + 1);*/
       }
 
       // ÉQUIPE B
 
       // Créer le processus parent A
-      ProcessusB = fork();
+      ProcessusQGB = fork();
 
       // On vérifie si le processus A a bien été crée
-      if (ProcessusB == 0)
+      if (ProcessusQGB == 0)
       {
             // Premier processus fils
-            ProcessusAttaquantB1 = fork();
+            ProcessusB1 = fork();
             // char received_message[100], send_message[100];
 
-            if (ProcessusAttaquantB1 > 0)
+            if (ProcessusB1 > 0)
             {
                   itoa(getpid(), QGB1, 2);
                   //  printf("Mon 1er fils pid du processus B %s .\n", QGB1);
                   char buf[sizeof(message_to_send)];
-                  close(pipefd[1]);                  // ferme la fin d'écriture du tube
-                  read(pipefd[0], buf, sizeof(buf)); // lit depuis la fin de lecture du tube
+                  close(fd[1]);                  // ferme la fin d'écriture du tube
+                  read(fd[0], buf, sizeof(buf)); // lit depuis la fin de lecture du tube
                   // printf("received message 1er fils du processus B: %s\n", buf);
 
                   fichier = fopen("dossiers/f0000.txt", "a+");
@@ -380,10 +245,10 @@ int main(int argc, char *argv[])
                         size = ftell(fichier);
 
                         printf("La taille du fichier est de %d avant que B écrive \n", size);
-                        //  handle_mysigterm(PidProcessusAttaquantA1);
+                        //  handle_mysigterm(PidProcessusA1);
                         if (size == 0)
                         {
-                                strcpy(resultat, "Num Equipe B : ");
+                              strcpy(resultat, "Num Equipe B : ");
                               strcat(resultat, NumEquipB);
                               strcat(resultat, " - PID attaquant : ");
                               strcat(resultat, QGB1);
@@ -395,37 +260,26 @@ int main(int argc, char *argv[])
                         }
                         else
                         {
+
                               printf("File is not empty Team A already write!\n");
-                              printf("PidProcessusAttaquanA1 dans Processus B : %d\n", PidProcessusAttaquantA1);
-                              strcpy(resultat, "Mort du ProcessusAttaquant A1. Num Equipe B ");
+                              printf("PidProcessusAttaquanA1 dans Processus B : %d\n", PidProcessusA1);
+                              strcpy(resultat, "Mort du Processus A1. Num Equipe B ");
                               strcat(resultat, NumEquipB);
                               strcat(resultat, " - PID attaquant : ");
                               strcat(resultat, QGB1);
                               strcat(resultat, "\n");
                               fprintf(fichier, "%s", resultat);
-                            //  fprintf(fichier, "Mort du ProcessusAttaquant A1\nTeam B- ProcessusAttaquant B1\n");
+                              //  fprintf(fichier, "Mort du Processus A1\nTeam B- Processus B1\n");
                               scoring("teamB");
-                              // printf("PidProcessusAttaquantA1 : %d!\n", PidProcessusAttaquantA1);
-
-                              /**   int result = kill(PidProcessusAttaquantA1, SIGKILL);
-                                 if (result == -1)
-                                 {
-                                       perror("Error killing process");
-                                 }
-                                 else
-                                 {
-                                       printf("File is not empty Team A already write!\n");
-                                       fprintf(fichier, "Team B- ProcessusAttaquant B1\n");
-                                       fclose(fichier);
-                                       scoring("teamB");
-                                 }*/
-                              // read_info_in_file("",fichier,);
+                              signal(SIGQUIT, gestionnaire_quitter);
+                              printf("Envoi du signal SIGQUIT\n");
+                              raise(SIGQUIT);
                         }
 
                         //
                   }
 
-                  close(pipefd[0]);
+                  close(fd[0]);
                   // return 0;
             }
             return 0;
@@ -436,15 +290,16 @@ int main(int argc, char *argv[])
             itoa(getpid(), QGB, 2);
             //  printf("Mon pid  du processus principal B %s .\n", QGA);
 
-            close(pipefd[0]); // ferme la fin de lecture du tube
-            write(pipefd[1], message_to_send, strlen(message_to_send) + 1);
-            close(pipefd[1]); /** */
+            close(fd[0]); // ferme la fin de lecture du tube
+            write(fd[1], message_to_send, strlen(message_to_send) + 1);
+            close(fd[1]); /** */
 
             // Processus père
-            /**  close(pipefd[0]);
+            /**  close(fd[0]);
                strcpy(buffer, "Bonjour, je suis le processus père !\n");
-               write(pipefd[1], buffer, strlen(buffer) + 1);*/
+               write(fd[1], buffer, strlen(buffer) + 1);*/
       }
+     // printf("Scrore finale : \n Équipe A : %s\n Équipe B : %s \n",score_team_A, score_team_B );
       return 0;
       // Ici c'est le processus du père
 }
