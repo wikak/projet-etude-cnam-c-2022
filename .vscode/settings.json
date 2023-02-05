@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        ".env": "dotenv",
+        "__config": "c",
+        "*.inc": "c",
+        "ratio": "c"
+    }
+}
